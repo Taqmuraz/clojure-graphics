@@ -1,0 +1,48 @@
+(require 'rotating-triangle.core)
+(-main)
+(main)
+(:main)
+exit
+(require 'rotating-triangle.core)
+(-main)
+(require 'rotating-triangle.core)
+(-main)
+exit
+(require 'rotating-triangle.core)
+exit
+(require 'rotating-triangle.core)
+(-main)
+(require 'rotating-triangle.core)
+(-main)
+exit
+(require 'rotating-triangle.core)
+(q/defsketch rotating-triangle
+  :size [300 300]
+  :setup setup
+  :draw draw)
+(ns rotating-triangle.core
+  (:require [quil.core :as q]))
+(q/defsketch rotating-triangle
+  :size [300 300]
+  :setup setup
+  :draw draw)
+clear
+(draw)
+draw
+rotating-triangle.core/draw
+rotating-triangle.core.draw
+rotating-triangle.core/draw
+clear
+exi
+exit
+(require 'rotating-triangle.core)
+(-main)
+exit
+(require '[rotating-triangle.core :as r])
+(r/main)
+r
+(require '[rotating-triangle.core :as r])
+(load-file "src/rotating-triangle/core.clj")
+exit
+(load-file "src/rotating-triangle/core.clj")
+exit
