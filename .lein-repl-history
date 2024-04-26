@@ -46,3 +46,20 @@ r
 exit
 (load-file "src/rotating-triangle/core.clj")
 exit
+(require 'linear.vector-xy)
+(add [1 1] [2 2])
+(require 'linear.vector-xy :as xy)
+(ns test (:require [linear.vector-xy :as xy]))
+(xy/add [1 1] [2 2])
+(xy/add [1 2] [3 4])
+exit
+(ns test (:require [linear.vector-xy :as xy]))
+(xy/len [1 2])
+(xy/len [1 0])
+(xy/dot [1 0] [1 0])
+(xy/dot [1 0] [0 1])
+exit
+(ns test (:require [linear.vector-xy :as xy]))
+(xy/dot [1 0] [0 1])
+(xy/dot [1 0] [1 0])
+exit

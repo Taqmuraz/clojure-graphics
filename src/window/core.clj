@@ -10,7 +10,7 @@
    :dest [0 0]})
 
 (defn update-state [state]
-  (def d (xy/sub (:pos state) (:dest state)))
+  (def d (xy/sub (:dest state) (:pos state)))
   (def l (xy/len d))
   (def s 10)
   (def v
@@ -34,13 +34,13 @@
   (q/fill 150)
   (apply q/ellipse (concat (:pos state) [100 100]))
 )
-
-(q/defsketch window
-  :title "Лисьп"
-  :size [500 500]
-  :setup setup
-  :update update-state
-  :draw draw-state
-  :middleware [m/fun-mode]
-  :features [:keep-on-top]
+(defn -main [& args]
+  (q/defsketch window
+    :title "Лисьп"
+    :size [500 500]
+    :setup setup
+    :update update-state
+    :draw draw-state
+    :middleware [m/fun-mode]
+  )
 )

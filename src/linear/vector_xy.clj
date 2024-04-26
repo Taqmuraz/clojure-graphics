@@ -31,6 +31,6 @@
   )
 )
 
-(defn dot [a b] (apply + (add a b)))
+(defn dot [a b] (apply + (mul a b)))
 (defn len [v] (math/sqrt (dot v v)))
 (defn norm [v] (divf v (len v)))
