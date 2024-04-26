@@ -1,48 +1,45 @@
 (ns window.core
-  (:require [quil.core :as q]
-            [quil.middleware :as m]))
+  (:require [quil.core :as q :include-macros true]
+            [quil.middleware :as m]
+            [linear.vector-xy :as xy]))
 
 (defn setup []
-  ; Set frame rate to 30 frames per second.
-  (q/frame-rate 60)
-  ; Set color mode to HSB (HSV) instead of default RGB.
+  (q/frame-rate 30)
   (q/color-mode :hsb)
-  ; setup function returns initial state. It contains
-  ; circle color and position.
-  {:color 0
-   :angle 0})
+  {:pos [0 0]
+   :dest [0 0]})
 
 (defn update-state [state]
-  ; Update sketch state by changing circle color and position.
-  {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)})
+  (def d (xy/sub (:pos state) (:dest state)))
+  (def l (xy/len d))
+  (def s 10)
+  (def v
+    (if
+      (> l s)
+      (xy/divf d l)
+      [0 0]))
+  (assoc {}
+    :pos
+    (xy/add (:pos state) (xy/mulf v s))
+    :dest
+    (if (q/mouse-pressed?)
+      [(q/mouse-x) (q/mouse-y)]
+      (:dest state)
+    )
+  )
+)
 
 (defn draw-state [state]
-  ; Clear the sketch by filling it with light-grey color.
   (q/background 240)
-  ; Set circle color.
-  (q/fill (:color state) 255 255)
-  ; Calculate x and y coordinates of the circle.
-  (doseq [i (range 1 50)] (let [angle (:angle state)
-        x (* 100 (q/cos (* 0.01 i angle)))
-        y (* 100 (q/sin (* 0.01 i angle)))]
-    ; Move origin point to the center of the sketch.
-    (q/with-translation [(+ (/ (q/width) 2) (* 2 (- i 25)))
-                         (+ (/ (q/height) 2) (* 2 (- i 25)))]
-      ; Draw the circle.
-      (q/ellipse x y (+ 10 (* i 1)) (+ 10 (* i 1)))))))
+  (q/fill 150)
+  (apply q/ellipse (concat (:pos state) [100 100]))
+)
 
-(defn -main[& args]
-  (q/defsketch window
-    :title "ЛисьП"
-    :size [500 500]
-    ; setup function called only once, during sketch initialization.
-    :setup setup
-    ; update-state is called on each iteration before draw-state.
-    :update update-state
-    :draw draw-state
-    :features [:keep-on-top]
-    ; This sketch uses functional-mode middleware.
-    ; Check quil wiki for more info about middlewares and particularly
-    ; fun-mode.
-    :middleware [m/fun-mode]))
+(q/defsketch my
+  :host "host"
+  :size [500 500]
+  :setup setup
+  :update update-state
+  :draw draw-state
+  :middleware [m/fun-mode]
+)
