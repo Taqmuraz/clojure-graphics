@@ -1,10 +1,10 @@
 (ns window.core
-  (:require [quil.core :as q :include-macros true]
+  (:require [quil.core :as q]
             [quil.middleware :as m]
             [linear.vector-xy :as xy]))
 
 (defn setup []
-  (q/frame-rate 30)
+  (q/frame-rate 60)
   (q/color-mode :hsb)
   {:pos [0 0]
    :dest [0 0]})
@@ -35,11 +35,12 @@
   (apply q/ellipse (concat (:pos state) [100 100]))
 )
 
-(q/defsketch my
-  :host "host"
+(q/defsketch window
+  :title "Лисьп"
   :size [500 500]
   :setup setup
   :update update-state
   :draw draw-state
   :middleware [m/fun-mode]
+  :features [:keep-on-top]
 )
