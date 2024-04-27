@@ -10,14 +10,14 @@
   (q/frame-rate fps)
   (q/color-mode :hsb)
   {
-    :player (q/load-image "res/image.jpg")
+    :player (q/load-image "res/knight.png")
     :pos [0 0]
     :dest [0 0]})
 
 (defn update-state [state]
   (def d (xy/sub (state :dest) (state :pos)))
   (def l (xy/len d))
-  (def s (* delta-time 500))
+  (def s (* delta-time 200))
   (def v
     (if
       (> l s)
