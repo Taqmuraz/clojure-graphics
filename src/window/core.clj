@@ -3,16 +3,21 @@
             [quil.middleware :as m]
             [linear.vector-xy :as xy]))
 
+(def fps 60)
+(def delta-time (/ 1.0 60.0))
+
 (defn setup []
-  (q/frame-rate 60)
+  (q/frame-rate fps)
   (q/color-mode :hsb)
-  {:pos [0 0]
-   :dest [0 0]})
+  {
+    :player (q/load-image "res/image.jpg")
+    :pos [0 0]
+    :dest [0 0]})
 
 (defn update-state [state]
-  (def d (xy/sub (:dest state) (:pos state)))
+  (def d (xy/sub (state :dest) (state :pos)))
   (def l (xy/len d))
-  (def s 10)
+  (def s (* delta-time 500))
   (def v
     (if
       (> l s)
@@ -20,19 +25,21 @@
       [0 0]))
   (assoc {}
     :pos
-    (xy/add (:pos state) (xy/mulf v s))
+    (xy/add (state :pos) (xy/mulf v s))
     :dest
     (if (q/mouse-pressed?)
       [(q/mouse-x) (q/mouse-y)]
-      (:dest state)
+      (state :dest)
     )
+    :player (state :player)
   )
 )
 
 (defn draw-state [state]
   (q/background 240)
   (q/fill 150)
-  (apply q/ellipse (concat (:pos state) [100 100]))
+  (def size [100 100])
+  (apply q/image (concat [(state :player)] (xy/sub (state :pos) (xy/mulf size 0.5)) size))
 )
 (defn -main [& args]
   (q/defsketch window
