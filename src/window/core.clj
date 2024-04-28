@@ -6,13 +6,28 @@
 (def fps 60)
 (def delta-time (/ 1.0 60.0))
 
+(defn limb
+  ([piv len wid rot fun] (limb piv len wid rot fun []))
+  ([piv len wid rot fun cld]
+    (q/push-matrix)
+    (apply q/translate piv)
+    (q/rotate (q/radians rot))
+    (q/push-matrix)
+    (q/scale len wid)
+    (fun)
+    (q/pop-matrix)
+    (dorun (map #(apply limb %) cld))
+    (q/pop-matrix)
+  )
+)
+
 (defn setup []
   (q/frame-rate fps)
-  (q/color-mode :hsb)
+  (q/color-mode :rgb)
   {
     :player (q/load-image "res/knight.png")
-    :pos [0 0]
-    :dest [0 0]})
+    :pos [100 100]
+    :dest [100 100]})
 
 (defn update-state [state]
   (def d (xy/sub (state :dest) (state :pos)))
@@ -37,7 +52,12 @@
 
 (defn draw-state [state]
   (q/background 240)
-  (q/fill 150)
+  (defn bx [] (q/no-stroke) (q/fill 150) (q/rect 0 0 1 1))
+  (limb [100 100] 100 50 0 bx
+    [
+      [[100 0] 100 40 45 bx]
+    ]
+  )
   (def size [100 100])
   (apply q/image (concat [(state :player)] (xy/sub (state :pos) (xy/mulf size 0.5)) size))
 )
