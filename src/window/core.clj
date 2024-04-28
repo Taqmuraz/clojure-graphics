@@ -6,6 +6,15 @@
 (def fps 60)
 (def delta-time (/ 1.0 60.0))
 
+(defn sprite [img mat]
+  (q/push-matrix)
+  (apply q/apply-matrix mat)
+  (q/translate 0 1)
+  (q/scale 1 -1)
+  (q/image img 0 0 1 1)
+  (q/pop-matrix)
+)
+
 (defn limb
   ([piv len wid rot fun] (limb piv len wid rot fun []))
   ([piv len wid rot fun cld]
@@ -26,40 +35,61 @@
   (q/color-mode :rgb)
   {
     :player (q/load-image "res/knight.png")
-    :pos [100 100]
-    :dest [100 100]})
+    :pos [0 0]
+  }
+)
 
 (defn update-state [state]
-  (def d (xy/sub (state :dest) (state :pos)))
-  (def l (xy/len d))
-  (def s (* delta-time 200))
+  (def s (* delta-time 3))
   (def v
-    (if
-      (> l s)
-      (xy/divf d l)
-      [0 0]))
-  (assoc {}
-    :pos
-    (xy/add (state :pos) (xy/mulf v s))
-    :dest
-    (if (q/mouse-pressed?)
-      [(q/mouse-x) (q/mouse-y)]
-      (state :dest)
+    (cond
+      (not (q/key-pressed?)) [0 0]
+      (= (q/key-as-keyword) :a) [-1 0]
+      (= (q/key-as-keyword) :d) [1 0]
+      (= (q/key-as-keyword) :s) [0 -1]
+      (= (q/key-as-keyword) :w) [0 1]
+      true [0 0]
     )
+  )
+  (println state)
+  (assoc {}
+    :pos (xy/add (state :pos) (xy/mulf v s))
     :player (state :player)
   )
+)
+
+(defn viewport[w h]
+  [
+    (/ w 2) 0 (/ w 2)
+    0 (/ h -2) (/ h 2)
+  ]
+)
+(defn world[cam-x cam-y scale]
+  [
+    scale 0 cam-x
+    0 scale cam-y
+  ]
+)
+(defn translation[x y]
+  [
+    1 0 x
+    0 1 y
+  ]
 )
 
 (defn draw-state [state]
   (q/background 240)
   (defn bx [] (q/no-stroke) (q/fill 150) (q/rect 0 0 1 1))
-  (limb [100 100] 100 50 0 bx
+  (q/push-matrix)
+  (apply q/apply-matrix (viewport (q/width) (q/height)))
+  (apply q/apply-matrix (world 0 0 1))
+  (sprite (state :player) (apply translation (state :pos)))
+  (limb [0 0.5] 0.5 0.1 0 bx
     [
-      [[100 0] 100 40 45 bx]
+      [[0.5 0] 0.2 0.1 45 bx]
     ]
   )
-  (def size [100 100])
-  (apply q/image (concat [(state :player)] (xy/sub (state :pos) (xy/mulf size 0.5)) size))
+  (q/pop-matrix)
 )
 (defn -main [& args]
   (q/defsketch window
