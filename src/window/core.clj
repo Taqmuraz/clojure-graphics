@@ -25,9 +25,14 @@
     (q/scale len wid)
     (fun)
     (q/pop-matrix)
+    (q/translate (* wid -0.5) 0)
     (dorun (map #(apply limb %) cld))
     (q/pop-matrix)
   )
+)
+
+(defn time[]
+  (* (q/millis) 0.001)
 )
 
 (defn setup []
@@ -51,7 +56,6 @@
       true [0 0]
     )
   )
-  (println state)
   (assoc {}
     :pos (xy/add (state :pos) (xy/mulf v s))
     :player (state :player)
@@ -66,8 +70,8 @@
 )
 (defn world[cam-x cam-y scale]
   [
-    scale 0 cam-x
-    0 scale cam-y
+    (/ 1 scale) 0 cam-x
+    0 (/ 1 scale) cam-y
   ]
 )
 (defn translation[x y]
@@ -82,11 +86,25 @@
   (defn bx [] (q/no-stroke) (q/fill 150) (q/rect 0 0 1 1))
   (q/push-matrix)
   (apply q/apply-matrix (viewport (q/width) (q/height)))
-  (apply q/apply-matrix (world 0 0 1))
+  (apply q/apply-matrix (world 0 0 3))
   (sprite (state :player) (apply translation (state :pos)))
-  (limb [0 0.5] 0.5 0.1 0 bx
+  (q/fill 255 0 0)
+  (q/ellipse 0 0 0.1 0.1)
+  (limb [0 0] 1 1 0 #() ;root
     [
-      [[0.5 0] 0.2 0.1 45 bx]
+      [
+        [0 1] 0.4 0.6 0 bx ;body
+        [
+          [
+            [0 0] 0.5 0.1 -120 bx ;arm-l
+            [
+              [
+                [0.5 0] 0.5 0.1 0 bx ;forearm-l
+              ]
+            ]
+          ]
+        ]
+      ]
     ]
   )
   (q/pop-matrix)
