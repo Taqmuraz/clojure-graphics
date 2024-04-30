@@ -1,0 +1,1 @@
+java SpriteAssembler.java $1 $2
