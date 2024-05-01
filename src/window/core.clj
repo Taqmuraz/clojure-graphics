@@ -49,11 +49,24 @@
 (defn setup []
   (q/frame-rate fps)
   (q/color-mode :rgb)
-  {
-    :player (load-anim (q/load-image "res/knight_walk.png") 512 512)
-    :pos [0 0]
-    :dir 1
-  }
+  (def anims
+    (reduce (fn [m [k v]]
+      (conj m [k (load-anim (q/load-image v) 512 512)]))
+      {}
+      [
+        [:idle "res/knight_idle.png"]
+        [:walk "res/knight_walk.png"]
+      ]
+    )
+  )
+  (merge
+    anims
+    {
+      :player (anims :walk)
+      :pos [0 0]
+      :dir 1
+    }
+  )
 )
 
 (defn update-state [state]
@@ -69,15 +82,17 @@
     )
   )
   (def dx (double(v 0)))
-  (assoc {}
-    :pos (xy/add (state :pos) (xy/mulf v s))
-    :player (state :player)
-    :dir
-      (cond
-        (> dx 0) 1
-        (< dx 0) -1
-        :else (state :dir)
-      )
+  (merge state
+    {
+      :pos (xy/add (state :pos) (xy/mulf v s))
+      :player (if (= (xy/len v) 0.0) (state :idle) (state :walk))
+      :dir
+        (cond
+          (> dx 0) 1
+          (< dx 0) -1
+          :else (state :dir)
+        )
+    }
   )
 )
 
