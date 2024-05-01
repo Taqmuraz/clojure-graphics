@@ -1,0 +1,1 @@
+blender -b @1 -o @2 -F PNG -x 1 -a
