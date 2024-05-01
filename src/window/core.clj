@@ -9,7 +9,7 @@
 (defn sprite [img mat]
   (q/push-matrix)
   (apply q/apply-matrix mat)
-  (q/translate 0 1)
+  (q/translate -0.5 0.5)
   (q/scale 1 -1)
   (q/image img 0 0 1 1)
   (q/pop-matrix)
@@ -20,7 +20,9 @@
 )
 
 (defn anim [fs n]
-  (map #(fs (int (mod (/ % 2) n))) (range))
+  (fn [t]
+    (fs (int (mod (* t n) n)))
+  )
 )
 
 (defn load-anim [img ew eh]
@@ -50,6 +52,7 @@
   {
     :player (load-anim (q/load-image "res/knight_walk.png") 512 512)
     :pos [0 0]
+    :dir 1
   }
 )
 
@@ -62,12 +65,19 @@
       (= (q/key-as-keyword) :d) [1 0]
       (= (q/key-as-keyword) :s) [0 -1]
       (= (q/key-as-keyword) :w) [0 1]
-      true [0 0]
+      :else [0 0]
     )
   )
+  (def dx (double(v 0)))
   (assoc {}
     :pos (xy/add (state :pos) (xy/mulf v s))
-    :player (drop 1 (state :player))
+    :player (state :player)
+    :dir
+      (cond
+        (> dx 0) 1
+        (< dx 0) -1
+        :else (state :dir)
+      )
   )
 )
 
@@ -106,7 +116,7 @@
   (q/push-matrix)
   (apply q/apply-matrix (viewport (q/width) (q/height)))
   (apply q/apply-matrix (world 0 0 3))
-  (sprite (first (state :player)) (apply translation-scale (concat (state :pos) [2 2])))
+  (sprite ((state :player) (time)) (apply translation-scale (concat (state :pos) [(* 2 (state :dir)) 2])))
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)
   (q/pop-matrix)
