@@ -63,3 +63,18 @@ exit
 (xy/dot [1 0] [0 1])
 (xy/dot [1 0] [1 0])
 exit
+(require quil.core :as q)
+(require 'quil.core :as q)
+(ns test (:require [quil.core :as q]))
+(.width (q/load-image "res/knight_walk.png"))
+(q/load-image "res/knight_walk.png")
+(q/color-mode :rgb)
+(q/load-image "res/knight_walk.png")
+(q/create-image 10 10)
+(q/create-image 10 10 :rgb)
+(ns test (:require [quil.core :as q] [window.code :as w]))
+(ns test (:require [quil.core :as q] [window.core :as w]))
+(w/-main)
+(q/create-image 10 10 :rgb)
+(q/load-image "res/knight_walk.png")
+exit

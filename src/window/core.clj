@@ -15,31 +15,40 @@
   (q/pop-matrix)
 )
 
-(defn limb
-  ([piv len wid rot fun] (limb piv len wid rot fun []))
-  ([piv len wid rot fun cld]
-    (q/push-matrix)
-    (apply q/translate piv)
-    (q/rotate (q/radians rot))
-    (q/push-matrix)
-    (q/scale len wid)
-    (fun)
-    (q/pop-matrix)
-    (q/translate (* wid -0.5) 0)
-    (dorun (map #(apply limb %) cld))
-    (q/pop-matrix)
-  )
-)
-
 (defn time[]
   (* (q/millis) 0.001)
+)
+
+(defn anim [fs n]
+  (map #(fs (int (mod (/ % 2) n))) (range))
+)
+
+(defn load-anim [img ew eh]
+  (while (not (q/loaded? img)) ())
+  (def size [(.width img) (.height img)])
+  (def num (/ (size 0) ew))
+  (def res
+    (vec
+      (map
+        #(do [% (q/create-image ew eh :argb)])
+        (range num)
+      )
+    )
+  )
+  (doseq [[i frame] res]
+    (q/copy
+      img
+      frame
+      [(* ew i) 0 ew eh]
+      [0 0 ew eh]))
+  (anim (vec (map xy/get-y res)) num)
 )
 
 (defn setup []
   (q/frame-rate fps)
   (q/color-mode :rgb)
   {
-    :player (q/load-image "res/knight.png")
+    :player (load-anim (q/load-image "res/knight_walk.png") 512 512)
     :pos [0 0]
   }
 )
@@ -58,7 +67,7 @@
   )
   (assoc {}
     :pos (xy/add (state :pos) (xy/mulf v s))
-    :player (state :player)
+    :player (drop 1 (state :player))
   )
 )
 
@@ -68,12 +77,14 @@
     0 (/ h -2) (/ h 2)
   ]
 )
+
 (defn world[cam-x cam-y scale]
   [
     (/ 1 scale) 0 cam-x
     0 (/ 1 scale) cam-y
   ]
 )
+
 (defn translation[x y]
   [
     1 0 x
@@ -81,34 +92,26 @@
   ]
 )
 
+(defn translation-scale [x y w h]
+  [
+    w 0 x
+    0 h y
+  ]
+)
+
 (defn draw-state [state]
   (q/background 240)
+  (q/no-stroke)
   (defn bx [] (q/no-stroke) (q/fill 150) (q/rect 0 0 1 1))
   (q/push-matrix)
   (apply q/apply-matrix (viewport (q/width) (q/height)))
   (apply q/apply-matrix (world 0 0 3))
-  (sprite (state :player) (apply translation (state :pos)))
+  (sprite (first (state :player)) (apply translation-scale (concat (state :pos) [2 2])))
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)
-  (limb [0 0] 1 1 0 #() ;root
-    [
-      [
-        [0 1] 0.4 0.6 0 bx ;body
-        [
-          [
-            [0 0] 0.5 0.1 -120 bx ;arm-l
-            [
-              [
-                [0.5 0] 0.5 0.1 0 bx ;forearm-l
-              ]
-            ]
-          ]
-        ]
-      ]
-    ]
-  )
   (q/pop-matrix)
 )
+
 (defn -main [& args]
   (q/defsketch window
     :title "Лисьп"
