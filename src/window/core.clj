@@ -46,6 +46,9 @@
   (anim (vec (map xy/get-y res)) num)
 )
 
+(declare player-idle-state)
+(declare player-walk-state)
+
 (defn setup []
   (q/frame-rate fps)
   (q/color-mode :rgb)
@@ -59,41 +62,75 @@
       ]
     )
   )
-  (merge
-    anims
-    {
-      :player (anims :walk)
-      :pos [0 0]
-      :dir 1
-    }
+  (player-idle-state
+    (merge
+      anims
+      {
+        :anim (anims :idle)
+        :pos [0 0]
+        :dir 1
+      }
+    )
+  )
+)
+
+(defn wasd []
+  (cond
+    (not (q/key-pressed?)) [0 0]
+    (= (q/key-as-keyword) :a) [-1 0]
+    (= (q/key-as-keyword) :d) [1 0]
+    (= (q/key-as-keyword) :s) [0 -1]
+    (= (q/key-as-keyword) :w) [0 1]
+    :else [0 0]
+  )
+)
+
+(defn make-state [state next] (merge state { :next next }))
+
+(defn next-state [n] ((n :next) n))
+
+(defn player-idle-state [s]
+  (make-state
+    (merge s { :anim (s :idle) })
+    (fn [n]
+      (cond
+        (= (xy/len (wasd)) 0.0) n
+        :else (player-walk-state n)
+      )
+    )
+  )
+)
+
+(defn player-walk-state [s]
+  (make-state
+    (merge s { :anim (s :walk) })
+    (fn [n]
+      (cond
+        (= (xy/len (wasd)) 0.0) (player-idle-state n)
+        :else
+        (do
+          (def sp (* delta-time 3))
+          (def v (wasd))
+          (def dx (double(v 0)))
+          (merge n
+            {
+              :pos (xy/add (n :pos) (xy/mulf v sp))
+              :dir
+              (cond
+                (> dx 0) 1
+                (< dx 0) -1
+                :else (n :dir)
+              )
+            }
+          )
+        )
+      )
+    )
   )
 )
 
 (defn update-state [state]
-  (def s (* delta-time 3))
-  (def v
-    (cond
-      (not (q/key-pressed?)) [0 0]
-      (= (q/key-as-keyword) :a) [-1 0]
-      (= (q/key-as-keyword) :d) [1 0]
-      (= (q/key-as-keyword) :s) [0 -1]
-      (= (q/key-as-keyword) :w) [0 1]
-      :else [0 0]
-    )
-  )
-  (def dx (double(v 0)))
-  (merge state
-    {
-      :pos (xy/add (state :pos) (xy/mulf v s))
-      :player (if (= (xy/len v) 0.0) (state :idle) (state :walk))
-      :dir
-        (cond
-          (> dx 0) 1
-          (< dx 0) -1
-          :else (state :dir)
-        )
-    }
-  )
+  (next-state state)
 )
 
 (defn viewport[w h]
@@ -131,7 +168,7 @@
   (q/push-matrix)
   (apply q/apply-matrix (viewport (q/width) (q/height)))
   (apply q/apply-matrix (world 0 0 3))
-  (sprite ((state :player) (time)) (apply translation-scale (concat (state :pos) [(* 2 (state :dir)) 2])))
+  (sprite ((state :anim) (time)) (apply translation-scale (concat (state :pos) [(* 2 (state :dir)) 2])))
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)
   (q/pop-matrix)
