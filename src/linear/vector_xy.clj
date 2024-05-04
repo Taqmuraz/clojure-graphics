@@ -1,5 +1,6 @@
 (ns linear.vector-xy
-  (:require [clojure.math :as math]))
+  (:require [clojure.math :as math])
+)
 
 (defn get-x [v] (v 0))
 (defn get-y [v] (v 1))
