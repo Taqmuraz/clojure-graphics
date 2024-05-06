@@ -14,7 +14,7 @@
 (defn load-anim [img ew eh]
   (while (not (q/loaded? img)) ())
   (def size [(.width img) (.height img)])
-  (def num (/ (size 0) ew))
+  (def img-num (/ (size 0) ew))
   (def res
     (map
       #(do
@@ -28,9 +28,9 @@
           frame
         )
       )
-      (range num)
+      (range img-num)
     )
   )
-  (anim (vec res) num)
+  (anim (vec res) img-num)
 )
 

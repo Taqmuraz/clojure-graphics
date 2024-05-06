@@ -25,16 +25,9 @@
       ]
     )
   )
-  (gs/idle-state
-    (merge
-      anims
-      {
-        :anim (anims :idle)
-        :pos [0 0]
-        :dir 1
-        :input input/wasd
-      }
-    )
+  (gs/list-state
+    (gs/idle-state (gs/agent anims :idle [0 0] 1 [2 2] input/wasd))
+    (gs/idle-state (gs/agent anims :idle [0.5 0] -1 [2 2] (fn [] [0 0])))
   )
 )
 
@@ -48,7 +41,7 @@
   (q/push-matrix)
   (apply q/apply-matrix (mat2/viewport (q/width) (q/height)))
   (apply q/apply-matrix (mat2/world 0 0 3))
-  (draw/sprite ((state :anim) (time/time)) (apply mat2/translation-scale (concat (state :pos) [(* 2 (state :dir)) 2])))
+  (gs/draw-state state)
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)
   (q/pop-matrix)
