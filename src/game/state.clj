@@ -1,7 +1,6 @@
 (ns game.state
   (:require
     [linear.vector-xy :as xy]
-    [game.input :as input]
     [game.time :as time]
   )
 )
@@ -10,28 +9,28 @@
 
 (defn next-state [n] ((n :next) n))
 
-(declare player-idle-state)
-(declare player-walk-state)
+(declare idle-state)
+(declare walk-state)
 
-(defn player-idle-state [s]
+(defn idle-state [s]
   (make-state
     (merge s { :anim (s :idle) })
     (fn [n]
       (cond
-        (= (xy/len (input/wasd)) 0.0) n
-        :else (player-walk-state n)
+        (= (xy/len ((n :input))) 0.0) n
+        :else (walk-state n)
       )
     )
   )
 )
 
-(defn player-walk-state [s]
+(defn walk-state [s]
   (make-state
     (merge s { :anim (s :walk) })
     (fn [n]
-      (def v (input/wasd))
+      (def v ((n :input)))
       (cond
-        (= (xy/len v) 0.0) (player-idle-state n)
+        (= (xy/len v) 0.0) (idle-state n)
         :else
         (do
           (def sp (* (time/delta-time) 3))

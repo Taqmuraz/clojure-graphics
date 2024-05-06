@@ -8,6 +8,7 @@
     [game.time :as time]
     [game.anim :as anim]
     [game.draw :as draw]
+    [game.input :as input]
   )
 )
 
@@ -24,13 +25,14 @@
       ]
     )
   )
-  (gs/player-idle-state
+  (gs/idle-state
     (merge
       anims
       {
         :anim (anims :idle)
         :pos [0 0]
         :dir 1
+        :input input/wasd
       }
     )
   )

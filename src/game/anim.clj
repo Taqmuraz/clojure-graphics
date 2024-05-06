@@ -16,19 +16,21 @@
   (def size [(.width img) (.height img)])
   (def num (/ (size 0) ew))
   (def res
-    (vec
-      (map
-        #(do [% (q/create-image ew eh :argb)])
-        (range num)
+    (map
+      #(do
+        (let [frame (q/create-image ew eh :argb)]
+          (q/copy
+            img
+            frame
+            [(* ew %) 0 ew eh]
+            [0 0 ew eh]
+          )
+          frame
+        )
       )
+      (range num)
     )
   )
-  (doseq [[i frame] res]
-    (q/copy
-      img
-      frame
-      [(* ew i) 0 ew eh]
-      [0 0 ew eh]))
-  (anim (vec (map xy/get-y res)) num)
+  (anim (vec res) num)
 )
 
