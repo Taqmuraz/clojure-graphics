@@ -9,8 +9,8 @@
 
 (defn world[cam-x cam-y scale]
   [
-    (/ 1 scale) 0 cam-x
-    0 (/ 1 scale) cam-y
+    (/ 1 scale) 0 (/ cam-x scale)
+    0 (/ 1 scale) (/ cam-y scale)
   ]
 )
 

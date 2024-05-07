@@ -13,6 +13,12 @@
 
 (defn draw-state [d] ((d :draw) d))
 
+(defn follow-by-camera [s]
+  (assoc s :cam-pos (fn [n] (n :pos)))
+)
+
+(defn camera-from-state [s] ((get s :cam-pos (fn [_] [0 0])) s))
+
 (defn agent [anims anim pos dir scale input]
   (merge anims
     {
@@ -39,6 +45,7 @@
 (defn list-state [& states]
 {
   :states states
+  :cam-pos (fn [s] (apply xy/add (map camera-from-state (s :states))))
   :draw
   (fn [d]
     (doseq [s (d :states)]
