@@ -42,7 +42,14 @@
   (q/no-stroke)
   (q/push-matrix)
   (apply q/apply-matrix (mat2/viewport (q/width) (q/height)))
-  (apply q/apply-matrix (apply mat2/world (conj (xy/sub (gs/camera-from-state state)) 3)))
+  (apply q/apply-matrix
+    (apply mat2/ortho
+      (concat
+        (xy/sub (gs/camera-from-state state))
+        [3 (/ (q/width) (q/height))]
+      )
+    )
+  )
   (gs/draw-state state)
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)

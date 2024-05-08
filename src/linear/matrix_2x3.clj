@@ -7,9 +7,9 @@
   ]
 )
 
-(defn world[cam-x cam-y scale]
+(defn ortho[cam-x cam-y scale aspect]
   [
-    (/ 1 scale) 0 (/ cam-x scale)
+    (/ 1 scale aspect) 0 (/ cam-x scale aspect)
     0 (/ 1 scale) (/ cam-y scale)
   ]
 )
