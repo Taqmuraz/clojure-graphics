@@ -25,11 +25,17 @@
       ]
     )
   )
-  (gs/list-state
-    (gs/follow-by-camera
-      (gs/idle-state (gs/agent anims :idle [0 0] 1 [2 2] input/wasd))
+  (apply gs/list-state
+    (->>
+      (range 100)
+      (map #(gs/idle-state (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] -1 [2 2] (fn [] [0 0]))))
+      (cons 
+        (gs/follow-by-camera
+          (gs/idle-state (gs/agent anims :idle [0 0] 1 [2 2] input/wasd))
+        )
+      )
+      (vec)
     )
-    (gs/idle-state (gs/agent anims :idle [0.5 0] -1 [2 2] (fn [] [0 0])))
   )
 )
 
@@ -58,8 +64,9 @@
 
 (defn -main [& args]
   (q/defsketch window
-    :title "Лисьп"
-    :size [500 500]
+    :title "Lissp"
+    :size [1000 800]
+    :renderer :p3d
     :setup setup
     :update update-state
     :draw draw-state
