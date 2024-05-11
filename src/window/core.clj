@@ -22,16 +22,23 @@
       [
         [:idle "res/knight_idle.png"]
         [:walk "res/knight_walk.png"]
+        [:attack "res/knight_attack.png"]
       ]
     )
   )
   (apply gs/list-state
     (->>
       (range 100)
-      (map #(gs/idle-state (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] -1 [2 2] (fn [] [0 0]))))
+      (map #(gs/idle-state
+        (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] -1 [2 2] (gs/empty-input)))
+      )
       (cons 
         (gs/follow-by-camera
-          (gs/idle-state (gs/agent anims :idle [0 0] 1 [2 2] input/wasd))
+          (gs/idle-state
+            (gs/agent anims :idle [0 0] 1 [2 2]
+              (gs/make-input input/wasd (partial input/key-pressed? :f))
+            )
+          )
         )
       )
       (vec)
@@ -44,7 +51,7 @@
 )
 
 (defn draw-state [state]
-  (q/background 240)
+  (q/background 100 130 230)
   (q/no-stroke)
   (q/push-matrix)
   (apply q/apply-matrix (mat2/viewport (q/width) (q/height)))
@@ -64,8 +71,8 @@
 
 (defn -main [& args]
   (q/defsketch window
-    :title "Lissp"
-    :size [1000 800]
+    :title "Lis'p"
+    :size [800 600]
     :renderer :p3d
     :setup setup
     :update update-state

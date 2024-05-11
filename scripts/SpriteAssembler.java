@@ -1,10 +1,10 @@
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.function.Function;
-
 import javax.imageio.ImageIO;
 
-import java.awt.image.BufferedImage;
+
 
 public class SpriteAssembler
 {
@@ -31,8 +31,9 @@ public class SpriteAssembler
     {
         String target = args[0];
         String destination = args[1];
+        File[] fs = new File(target).listFiles();
 
-        BufferedImage[] sources = Arrays.stream(new File(target).listFiles()).map(wrapThrowable(ImageIO::read)).toArray(BufferedImage[]::new);
+        BufferedImage[] sources = Arrays.stream(fs).sorted().map(wrapThrowable(ImageIO::read)).toArray(BufferedImage[]::new);
         int elementWidth = sources[0].getWidth();
         int elementHeight = sources[0].getHeight();
         int totalWidth = elementWidth * sources.length;

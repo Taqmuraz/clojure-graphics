@@ -4,20 +4,26 @@
     [linear.matrix-2x3 :as mat2]
     [game.time :as time]
     [game.draw :as draw]
+    [game.anim :as anim]
   )
 )
 
+(defn state-func [state sym & args] (apply (state sym) (cons state args)))
+
 (defn make-state [state next] (merge state { :next next }))
 
-(defn next-state [n] ((n :next) n))
+(defn next-state [n] (state-func n :next))
 
-(defn draw-state [d] ((d :draw) d))
+(defn draw-state [d] (state-func d :draw))
 
 (defn follow-by-camera [s]
   (assoc s :cam-pos (fn [n] (n :pos)))
 )
 
 (defn camera-from-state [s] ((get s :cam-pos (fn [_] [0 0])) s))
+
+(defn make-input [walk attack] { :walk walk :attack attack })
+(defn empty-input [] { :walk (constantly [0 0]) :attack (constantly false)})
 
 (defn agent [anims anim pos dir scale input]
   (merge anims
@@ -60,16 +66,33 @@
   )
 })
 
+(defn read-input [state sym] (((state :input) sym)))
+
 (declare idle-state)
 (declare walk-state)
+(declare attack-state)
 
 (defn idle-state [s]
   (make-state
     (merge s { :anim (s :idle) })
     (fn [n]
       (cond
-        (= (xy/len ((n :input))) 0.0) n
+        (read-input n :attack) (attack-state n)
+        (= (xy/len (read-input n :walk)) 0.0) n
         :else (walk-state n)
+      )
+    )
+  )
+)
+
+(defn attack-state [s]
+  (def start (time/time))
+  (make-state
+    (assoc s :anim (anim/anim-offset (s :attack) start))
+    (fn [n]
+      (cond
+        (> (- (time/time) start) 1) (idle-state n)
+        :else n
       )
     )
   )
@@ -79,8 +102,9 @@
   (make-state
     (merge s { :anim (s :walk) })
     (fn [n]
-      (def v ((n :input)))
+      (def v (read-input n :walk))
       (cond
+        (read-input n :attack) (attack-state n)
         (= (xy/len v) 0.0) (idle-state n)
         :else
         (do

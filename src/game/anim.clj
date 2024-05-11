@@ -10,6 +10,9 @@
     (fs (int (mod (* t n) n)))
   )
 )
+(defn anim-offset [a o]
+  (comp a #(- % o))
+)
 
 (defn load-anim [img ew eh]
   (while (not (q/loaded? img)) ())

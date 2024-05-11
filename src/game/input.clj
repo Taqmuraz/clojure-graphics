@@ -14,3 +14,7 @@
     :else [0 0]
   )
 )
+
+(defn key-pressed? [k]
+  (and (q/key-pressed?) (= (q/key-as-keyword) k))
+)
