@@ -12,7 +12,7 @@
 )
 
 (defn anim-offset [a o]
-  (comp a - (partial - o))
+  #(a (- % o))
 )
 
 (defn load-anim [img ew eh]
