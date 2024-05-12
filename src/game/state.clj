@@ -58,12 +58,7 @@
       (draw-state s)
     )
   )
-  :physics
-  (fn [ph]
-    (doseq [f (map #(get % :physics identity) states)]
-      (f ph)
-    )
-  )
+  :physics (map #(get % :physics []) states)
   :next
   (fn [n]
     (apply list-state
