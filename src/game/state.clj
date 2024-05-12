@@ -58,6 +58,12 @@
       (draw-state s)
     )
   )
+  :physics
+  (fn [ph]
+    (doseq [f (map #(get % :physics identity) states)]
+      (f ph)
+    )
+  )
   :next
   (fn [n]
     (apply list-state
@@ -88,10 +94,13 @@
 (defn attack-state [s]
   (def start (time/time))
   (make-state
-    (assoc s :anim (anim/anim-offset (s :attack) start))
+    (assoc s
+      :anim (anim/anim-offset (s :attack) start)
+      :physics identity
+    )
     (fn [n]
       (cond
-        (> (- (time/time) start) 1) (idle-state n)
+        (> (- (time/time) start) 1) (idle-state (dissoc n :physics))
         :else n
       )
     )
