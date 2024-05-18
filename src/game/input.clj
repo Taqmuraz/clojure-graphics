@@ -7,11 +7,13 @@
 (defn wasd []
   (cond
     (not (q/key-pressed?)) [0 0]
-    (= (q/key-as-keyword) :a) [-1 0]
-    (= (q/key-as-keyword) :d) [1 0]
-    (= (q/key-as-keyword) :s) [0 -1]
-    (= (q/key-as-keyword) :w) [0 1]
-    :else [0 0]
+    :else (case (q/key-as-keyword)
+      :a [-1 0]
+      :d [1 0]
+      :s [0 -1]
+      :w [0 1]
+      [0 0]
+    )
   )
 )
 

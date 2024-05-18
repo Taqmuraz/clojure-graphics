@@ -63,6 +63,7 @@
       )
     )
   )
+  ((state :physics) state q/ellipse)
   (gs/draw-state state)
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)

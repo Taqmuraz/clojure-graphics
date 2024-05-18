@@ -48,6 +48,8 @@
   )
 )
 
+(defn physics-identity [s p] ())
+
 (defn list-state [& states]
 {
   :states states
@@ -58,7 +60,7 @@
       (draw-state s)
     )
   )
-  :physics (map #(get % :physics []) states)
+  :physics (fn[s p] ((comp dorun map) #((get % :physics physics-identity) % p) states))
   :next
   (fn [n]
     (apply list-state
@@ -91,7 +93,7 @@
   (make-state
     (assoc s
       :anim (anim/anim-offset (s :attack) start)
-      :physics identity
+      :physics (fn [s p] (apply p (concat (s :pos) [1 1])))
     )
     (fn [n]
       (cond
