@@ -35,3 +35,7 @@
 (defn dot [a b] (apply + (mul a b)))
 (defn len [v] (math/sqrt (dot v v)))
 (defn norm [v] (divf v (len v)))
+
+(defn clamp [c-min c-max v]
+  (map #(max %2 (min %1 %3)) v c-min c-max)
+)
