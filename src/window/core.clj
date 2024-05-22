@@ -29,7 +29,7 @@
   )
   (apply gs/list-state
     (->>
-      (range 1)
+      (range 100)
       (map #(gs/idle-state
         (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] -1 [2 2] (gs/empty-input)))
       )

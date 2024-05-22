@@ -89,7 +89,11 @@
 (defn read-input [state sym] (((state :input) sym)))
 
 (defn rect-from-state [s]
-  (vec (concat (s :pos) [1 1]))
+  ((comp vec concat) (s :pos) [1 1])
+)
+
+(defn attack-rect [s]
+  ((comp vec concat) (xy/add (s :pos) [(* 0.5 (s :dir)) 0]) [0.5 0.5])
 )
 
 (declare idle-state)
@@ -145,14 +149,18 @@
       )
     )
     (fn [s]
-      {
-        :attack
-        [{
-          :source (s :tag)
-          :damage 1
-          :rect (rect-from-state s)
-        }]
-      }
+      (cond
+        ((every-pred (partial < 0.4) (partial > 0.7)) (- (time/time) start))
+        {
+          :attack
+          [{
+            :source (s :tag)
+            :damage 1
+            :rect (attack-rect s)
+          }]
+        }
+        :else {}
+      )
     )
   )
 )
