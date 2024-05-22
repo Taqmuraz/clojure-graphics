@@ -27,14 +27,14 @@
 )
 
 (defn minmax [a b]
-  [a (xy/sub b a)]
+  ((comp vec concat) a (xy/sub b a))
 )
 
 (defn volume [r] (* (r W) (r H)))
 
 (defn intersect? [a b]
   (
-    (comp zero? volume (partial apply minmax) map)
+    (comp not zero? volume (partial apply minmax) (partial map vec) map)
     (partial xy/clamp (rect-min a) (rect-max a))
     [(rect-min b) (rect-max b)]
   )

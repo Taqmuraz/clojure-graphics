@@ -78,3 +78,6 @@ exit
 (q/create-image 10 10 :rgb)
 (q/load-image "res/knight_walk.png")
 exit
+(ns test (:require [linear.rect :as rect]))
+(rect/intersect? [0 0 1 1] [0 0 1 1])
+exit

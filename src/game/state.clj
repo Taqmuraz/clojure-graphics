@@ -18,7 +18,7 @@
 
 (defn make-state
   ([state next] (make-state state next effect-identity))
-  ([state next effect] (merge { :effect effect } state { :next next }))
+  ([state next effect] (merge state { :effect effect :next next }))
 )
 
 (defn next-state [eff n] (state-func n :next eff))
@@ -37,6 +37,7 @@
 (defn agent [anims anim pos dir scale input]
   (merge anims
     {
+      :tag (random-uuid)
       :anim (anims anim)
       :draw
       (fn [d]
@@ -83,6 +84,8 @@
   )
 })
 
+(def same-tag? =)
+
 (defn read-input [state sym] (((state :input) sym)))
 
 (defn rect-from-state [s]
@@ -100,9 +103,10 @@
       not
       empty?
       (partial filter (partial rect/intersect? (rect-from-state s)))
-      map
+      (partial map :rect)
+      (partial filter #((complement same-tag?) (s :tag) (% :source)))
     )
-    :rect (eff :attack)
+    (eff :attack)
   )
 )
 
@@ -144,6 +148,7 @@
       {
         :attack
         [{
+          :source (s :tag)
           :damage 1
           :rect (rect-from-state s)
         }]
