@@ -1,6 +1,6 @@
 (ns linear.rect
   (:require 
-    [linear.vector-xy as xy]
+    [linear.vector-xy :as xy]
   )
 )
 
@@ -32,10 +32,10 @@
 
 (defn volume [r] (* (r W) (r H)))
 
-(defn intersect [a b]
+(defn intersect? [a b]
   (
     (comp zero? volume (partial apply minmax) map)
-    (partial clamp (rect-min a) (rect-max a))
+    (partial xy/clamp (rect-min a) (rect-max a))
     [(rect-min b) (rect-max b)]
   )
 )

@@ -23,6 +23,7 @@
         [:idle "res/knight_idle.png"]
         [:walk "res/knight_walk.png"]
         [:attack "res/knight_attack.png"]
+        [:dead "res/knight_dead.png"]
       ]
     )
   )
@@ -47,7 +48,7 @@
 )
 
 (defn update-state [state]
-  (gs/next-state state)
+  (gs/next-state (gs/state-func state :effect) state)
 )
 
 (defn draw-state [state]
@@ -63,7 +64,6 @@
       )
     )
   )
-  ((state :physics) state q/ellipse)
   (gs/draw-state state)
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)

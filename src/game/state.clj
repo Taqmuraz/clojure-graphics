@@ -1,6 +1,7 @@
 (ns game.state
   (:require
     [linear.vector-xy :as xy]
+    [linear.rect :as rect]
     [linear.matrix-2x3 :as mat2]
     [game.time :as time]
     [game.draw :as draw]
@@ -8,11 +9,19 @@
   )
 )
 
-(defn state-func [state sym & args] (apply (state sym) (cons state args)))
+(defn state-func
+  ([state sym] ((state sym) state))
+  ([state sym arg] ((state sym) arg state))
+)
 
-(defn make-state [state next] (merge state { :next next }))
+(defn effect-identity [s] {})
 
-(defn next-state [n] (state-func n :next))
+(defn make-state
+  ([state next] (make-state state next effect-identity))
+  ([state next effect] (merge { :effect effect } state { :next next }))
+)
+
+(defn next-state [eff n] (state-func n :next eff))
 
 (defn draw-state [d] (state-func d :draw))
 
@@ -48,8 +57,6 @@
   )
 )
 
-(defn physics-identity [s p] ())
-
 (defn list-state [& states]
 {
   :states states
@@ -60,26 +67,58 @@
       (draw-state s)
     )
   )
-  :physics (fn[s p] ((comp dorun map) #((get % :physics physics-identity) % p) states))
+  :effect
+  (fn [s]
+    (
+      (comp (partial apply (partial merge-with concat)) map)
+      #(state-func % :effect)
+      (s :states)
+    )
+  )
   :next
-  (fn [n]
+  (fn [eff n]
     (apply list-state
-      (map next-state (n :states))
+      (map (partial next-state eff) (n :states))
     )
   )
 })
 
 (defn read-input [state sym] (((state :input) sym)))
 
+(defn rect-from-state [s]
+  (vec (concat (s :pos) [1 1]))
+)
+
 (declare idle-state)
 (declare walk-state)
 (declare attack-state)
+(declare dead-state)
+
+(defn check-attack [eff s]
+  (
+    (comp
+      not
+      empty?
+      (partial filter (partial rect/intersect? (rect-from-state s)))
+      map
+    )
+    :rect (eff :attack)
+  )
+)
+
+(defn dead-state [s] 
+  (make-state
+    (assoc s :anim (s :dead))
+    (fn [eff n] n)
+  )
+)
 
 (defn idle-state [s]
   (make-state
-    (merge s { :anim (s :idle) })
-    (fn [n]
+    (assoc s :anim (s :idle))
+    (fn [eff n]
       (cond
+        (check-attack eff n) (dead-state n)
         (read-input n :attack) (attack-state n)
         (= (xy/len (read-input n :walk)) 0.0) n
         :else (walk-state n)
@@ -93,23 +132,33 @@
   (make-state
     (assoc s
       :anim (anim/anim-offset (s :attack) start)
-      :physics (fn [s p] (apply p (concat (s :pos) [1 1])))
     )
-    (fn [n]
+    (fn [eff n]
       (cond
-        (> (- (time/time) start) 1) (idle-state (dissoc n :physics))
+        (check-attack eff n) (dead-state n)
+        (> (- (time/time) start) 1) (idle-state n)
         :else n
       )
+    )
+    (fn [s]
+      {
+        :attack
+        [{
+          :damage 1
+          :rect (rect-from-state s)
+        }]
+      }
     )
   )
 )
 
 (defn walk-state [s]
   (make-state
-    (merge s { :anim (s :walk) })
-    (fn [n]
+    (assoc s :anim (s :walk))
+    (fn [eff n]
       (def v (read-input n :walk))
       (cond
+        (check-attack eff n) (dead-state n)
         (read-input n :attack) (attack-state n)
         (= (xy/len v) 0.0) (idle-state n)
         :else
