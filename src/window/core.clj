@@ -79,5 +79,7 @@
     :update update-state
     :draw draw-state
     :middleware [m/fun-mode]
+    :key-pressed input/key-pressed
+    :key-released input/key-released
   )
 )
