@@ -38,6 +38,7 @@
   (merge anims
     {
       :tag (random-uuid)
+      :health 100
       :anim (anims anim)
       :draw
       (fn [d]
@@ -96,21 +97,32 @@
   ((comp vec concat) (xy/add (s :pos) [(* 0.5 (s :dir)) 0]) [0.5 0.5])
 )
 
+(defn swap-health [f s]
+  (
+    (comp (partial assoc s :health) f get)
+    s :health 0
+  )
+)
+
 (declare idle-state)
 (declare walk-state)
 (declare attack-state)
 (declare dead-state)
 
-(defn check-attack [eff s]
+(defn check-effect [eff s]
   (
     (comp
-      not
-      empty?
-      (partial filter (partial rect/intersect? (rect-from-state s)))
-      (partial map :rect)
-      (partial filter #((complement same-tag?) (s :tag) (% :source)))
+      (partial reduce (fn [n f] (f n)) s)
+      (partial map :func)
+      (partial filter (comp #(% s) :pred))
     )
-    (eff :attack)
+    (eff :area)
+  )
+)
+
+(defn comp-check [check nf]
+  (fn [eff n]
+    (nf eff (check eff n))
   )
 )
 
@@ -124,39 +136,49 @@
 (defn idle-state [s]
   (make-state
     (assoc s :anim (s :idle))
-    (fn [eff n]
+    (comp-check check-effect (fn [eff n]
       (cond
-        (check-attack eff n) (dead-state n)
+        (<= (n :health) 0) (dead-state n)
         (read-input n :attack) (attack-state n)
         (= (xy/len (read-input n :walk)) 0.0) n
         :else (walk-state n)
       )
-    )
+    ))
   )
 )
 
 (defn attack-state [s]
   (def start (time/time))
+  (def attacked (->> s :tag hash-set atom))
+
   (make-state
     (assoc s
       :anim (anim/anim-offset (s :attack) start)
     )
-    (fn [eff n]
+    (comp-check check-effect (fn [eff n]
       (cond
-        (check-attack eff n) (dead-state n)
+        (<= (n :health) 0) (dead-state n)
         (> (- (time/time) start) 1) (idle-state n)
         :else n
       )
-    )
+    ))
     (fn [s]
       (cond
         ((every-pred (partial < 0.4) (partial > 0.7)) (- (time/time) start))
         {
-          :attack
+          :area
           [{
-            :source (s :tag)
-            :damage 1
-            :rect (attack-rect s)
+            :func (partial swap-health (partial + -50))
+            :pred
+            (every-pred
+              (fn [n]
+                (let [ad @attacked tag (n :tag)]
+                  (swap! attacked #(conj % tag))
+                  (->> tag (contains? ad) not)
+                )
+              )
+              (comp (partial rect/intersect? (attack-rect s)) rect-from-state)
+            )
           }]
         }
         :else {}
@@ -168,10 +190,10 @@
 (defn walk-state [s]
   (make-state
     (assoc s :anim (s :walk))
-    (fn [eff n]
+    (comp-check check-effect (fn [eff n]
       (def v (read-input n :walk))
       (cond
-        (check-attack eff n) (dead-state n)
+        (<= (n :health) 0) (dead-state n)
         (read-input n :attack) (attack-state n)
         (= (xy/len v) 0.0) (idle-state n)
         :else
@@ -191,6 +213,6 @@
           )
         )
       )
-    )
+    ))
   )
 )
