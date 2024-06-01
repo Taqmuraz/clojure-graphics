@@ -10,6 +10,7 @@
     [game.draw :as draw]
     [game.input :as input]
   )
+  (:gen-class)
 )
 
 (defn setup []
