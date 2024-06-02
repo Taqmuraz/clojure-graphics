@@ -34,6 +34,13 @@
 (defn make-input [walk attack] { :walk walk :attack attack })
 (defn empty-input [] { :walk (constantly [0 0]) :attack (constantly false)})
 
+(defn norm-dir [d]
+  (cond
+    (zero? (xy/len d)) [1 0]
+    :else (xy/norm d)
+  )
+)
+
 (defn agent [anims anim pos dir scale input]
   (merge anims
     {
@@ -44,16 +51,16 @@
       (fn [d]
         (draw/sprite
           ((d :anim) (time/time))
-          (apply mat2/translation-scale
+          (apply mat2/translation-dir
             (concat
               (d :pos)
-              (xy/mul scale [(d :dir) 1])
+              (xy/mul (d :dir) scale)
             )
           )
         )
       )
       :pos pos
-      :dir dir
+      :dir (norm-dir dir)
       :input input
     }
   )
@@ -94,7 +101,7 @@
 )
 
 (defn attack-rect [s]
-  ((comp vec concat) (xy/add (s :pos) [(* 0.5 (s :dir)) 0]) [0.5 0.5])
+  ((comp vec concat) (xy/add (s :pos) (xy/mulf (s :dir) 0.5)) [0.5 0.5])
 )
 
 (defn swap-health [f s]
@@ -199,15 +206,13 @@
         :else
         (do
           (def sp (* (time/delta-time) 3))
-          (def dx (double(v 0)))
           (merge n
             {
               :pos (xy/add (n :pos) (xy/mulf v sp))
               :dir
               (cond
-                (> dx 0) 1
-                (< dx 0) -1
-                :else (n :dir)
+                (zero? (xy/len v)) (n :dir)
+                :else (xy/norm v)
               )
             }
           )

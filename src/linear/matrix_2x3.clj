@@ -1,4 +1,8 @@
-(ns linear.matrix-2x3)
+(ns linear.matrix-2x3
+  (:require
+    [clojure.math :as math]
+  )
+)
 
 (defn viewport[w h]
   [
@@ -25,5 +29,21 @@
   [
     w 0 x
     0 h y
+  ]
+)
+
+(def HPI (/ math/PI 2))
+
+(defn translation-rotation [x y r]
+  [
+    (math/cos r) (->> r (+ HPI) math/cos) x
+    (math/sin r) (->> r (+ HPI) math/sin) y
+  ]
+)
+
+(defn translation-dir [x y dx dy]
+  [
+    dx (- dy) x
+    dy dx     y
   ]
 )

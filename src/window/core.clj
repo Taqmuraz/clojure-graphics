@@ -32,12 +32,12 @@
     (->>
       (range 100)
       (map #(gs/idle-state
-        (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] -1 [2 2] (gs/empty-input)))
+        (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] [-1 0] [2 2] (gs/empty-input)))
       )
       (cons 
         (gs/follow-by-camera
           (gs/idle-state
-            (gs/agent anims :idle [0 0] 1 [2 2]
+            (gs/agent anims :idle [0 0] [1 0] [2 2]
               (gs/make-input input/wasd (partial input/key-pressed? :f))
             )
           )
@@ -53,7 +53,7 @@
 )
 
 (defn draw-state [state]
-  (q/background 100 130 230)
+  (q/background 230 230 230)
   (q/no-stroke)
   (q/push-matrix)
   (apply q/apply-matrix (mat2/viewport (q/width) (q/height)))
