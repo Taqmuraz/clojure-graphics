@@ -6,8 +6,8 @@
 )
 
 (defn sprite
-  ([img mat] (sprite img mat [0.5 0.5] [0 0 1 1]))
-  ([img mat piv uv]
+  ([img] (sprite img [0 0 1 1]))
+  ([img uv]
     (let
       [
         img-w (.width img)
@@ -18,8 +18,7 @@
         uh (->> 3 uv (* img-h))
       ]
       (q/push-matrix)
-      (apply q/apply-matrix mat)
-      (apply q/translate (xy/sub [0 1] piv))
+      (q/translate 0 1)
       (q/scale 1 -1)
       (q/begin-shape)
       (q/texture img)

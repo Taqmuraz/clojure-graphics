@@ -81,3 +81,7 @@ exit
 (ns test (:require [linear.rect :as rect]))
 (rect/intersect? [0 0 1 1] [0 0 1 1])
 exit
+(ns test (:require [linear.vector-xy :as xy]))
+(xy/sub [1 1])
+(xy/sub [0.5 0.5])
+exit

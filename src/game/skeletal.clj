@@ -1,11 +1,21 @@
 (ns game.skeletal
   (:require
     [quil.core :as q]
-    [game.draw :as draw]
     [linear.matrix-2x3 :as mat2]
   )
 )
 
-(defn limb [img uv piv len wid rot & chld]
-  (draw/sprite img (mat2/translation-rotation-scale 0 0 rot len wid) piv uv)
+(defn limb [img uv [px py] [pivx pivy] [sx sy] rot & chld]
+  (fn [sp]
+    (q/push-matrix)
+    (q/translate px py)
+    (q/rotate rot)
+    (q/push-matrix)
+    (q/translate (->> pivx (* sx) -) (->> pivy (* sy) -))
+    (q/scale sx sy)
+    (sp img uv)
+    (q/pop-matrix)
+    (doseq [c chld] (c sp))
+    (q/pop-matrix)
+  )
 )

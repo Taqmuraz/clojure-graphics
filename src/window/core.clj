@@ -17,36 +17,12 @@
 (defn setup []
   (q/frame-rate (time/fps))
   (q/color-mode :rgb)
-  (def anims
-    (reduce (fn [m [k v]]
-      (conj m [k (anim/load-anim (q/load-image v) 512 512)]))
-      {}
-      [
-        [:idle "res/knight_idle.png"]
-        [:walk "res/knight_walk.png"]
-        [:attack "res/knight_attack.png"]
-        [:dead "res/knight_dead.png"]
-      ]
-    )
-  )
-  (assoc (apply gs/list-state
-    (->>
-      (range 100)
-      (map #(gs/idle-state
-        (gs/agent anims :idle [(+ 0.5 (int (/ % 10))) (mod % 10)] [-1 0] [2 2] (gs/empty-input)))
-      )
-      (cons 
-        (gs/follow-by-camera
-          (gs/idle-state
-            (gs/agent anims :idle [0 0] [1 0] [2 2]
-              (gs/make-input input/wasd (partial input/key-pressed? :f))
-            )
-          )
-        )
-      )
-      (vec)
-    )
-  ) :example (q/load-image "res/example.png"))
+  {
+    :papa (q/load-image "res/human-map.png")
+    :next (fn [eff n] n)
+    :effect gs/effect-identity
+    :draw (fn [d] ())
+  }
 )
 
 (defn update-state [state]
@@ -70,7 +46,19 @@
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)
 
-  (sk/limb (state :example) [0 0 1 1] [0 0] 1 1 0)
+  (let [
+      papa (state :papa)
+      HPI (/ clojure.math/PI 2)
+      ; layout : image uv pos pivot scale rotation & children
+      head (sk/limb papa  [0.8 0 0.2 0.33]  [0 0.6]  [0.5 0.25] [0.2 0.2] 0)
+      kneel (sk/limb papa [0.4 0.5 0.2 0.5] [0 0.4]  [0.5 0.25] [0.2 0.4] 0)
+      kneer (sk/limb papa [0.4 0.5 0.2 0.5] [0 0.4]  [0.5 0.25] [0.2 0.4] 0)
+      legl (sk/limb papa  [0.4 0 0.2 0.5]   [-0.1 0] [0.5 0.25] [0.2 0.5] (* HPI 1.8) kneel)
+      legr (sk/limb papa  [0.4 0 0.2 0.5]   [0.1 0]  [0.5 0.25] [0.2 0.5] (* HPI 2.2))
+      limbs (sk/limb papa [0 0 0.4 1]       [0 1]    [0.5 0]    [0.4 0.6] 0 head legl legr)
+    ]
+    (limbs draw/sprite)
+  )
 
   (q/pop-matrix)
 )
