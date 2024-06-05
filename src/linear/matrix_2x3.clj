@@ -1,5 +1,6 @@
 (ns linear.matrix-2x3
   (:require
+    [linear.vector-xy :as xy]
     [clojure.math :as math]
   )
 )
@@ -38,6 +39,12 @@
   [
     (math/cos r) (->> r (+ HPI) math/cos) x
     (math/sin r) (->> r (+ HPI) math/sin) y
+  ]
+)
+(defn translation-rotation-scale [x y r sx sy]
+  [
+    (* sx (math/cos r)) (->> r (+ HPI) math/cos (* sy)) x
+    (* sx (math/sin r)) (->> r (+ HPI) math/sin (* sy)) y
   ]
 )
 

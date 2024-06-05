@@ -86,8 +86,10 @@
   )
   :next
   (fn [eff n]
-    (apply list-state
-      (map (partial next-state eff) (n :states))
+    (merge n
+      (apply list-state
+        (map (partial next-state eff) (n :states))
+      )
     )
   )
 })

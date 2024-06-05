@@ -9,6 +9,7 @@
     [game.anim :as anim]
     [game.draw :as draw]
     [game.input :as input]
+    [game.skeletal :as sk]
   )
   (:gen-class)
 )
@@ -28,7 +29,7 @@
       ]
     )
   )
-  (apply gs/list-state
+  (assoc (apply gs/list-state
     (->>
       (range 100)
       (map #(gs/idle-state
@@ -45,7 +46,7 @@
       )
       (vec)
     )
-  )
+  ) :example (q/load-image "res/example.png"))
 )
 
 (defn update-state [state]
@@ -68,6 +69,9 @@
   (gs/draw-state state)
   (q/fill 255 0 0)
   (q/ellipse 0 0 0.1 0.1)
+
+  (sk/limb (state :example) [0 0 1 1] [0 0] 1 1 0)
+
   (q/pop-matrix)
 )
 
